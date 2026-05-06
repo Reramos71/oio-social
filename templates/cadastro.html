@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Ôio Social - Cadastro</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:linear-gradient(135deg,#009c3b,#ffdf00);font-family:'Segoe UI',Arial;padding:20px}
+        .container{background:white;max-width:600px;margin:auto;padding:40px;border-radius:20px}
+        h2{color:#009c3b;text-align:center;margin-bottom:20px}
+        input,select{width:100%;padding:12px;margin:10px 0;border:1px solid #ddd;border-radius:8px}
+        button{width:100%;padding:12px;background:#009c3b;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:bold}
+        .flag{font-size:40px;text-align:center}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+        a{color:#009c3b;text-align:center;display:block;margin-top:15px}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="flag">🇧🇷</div>
+        <h2>Criar sua conta</h2>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for msg in messages %}
+                    <div style="background:#ffeb3b;padding:10px;border-radius:8px;margin-bottom:15px">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-row">
+                <input type="text" name="nome" placeholder="Nome completo" required>
+                <input type="text" name="apelido" placeholder="Apelido" required>
+            </div>
+            <div class="form-row">
+                <input type="date" name="data_nascimento" required>
+                <input type="text" name="cidade" placeholder="Cidade" required>
+            </div>
+            <div class="form-row">
+                <input type="text" name="estado" placeholder="Estado (ex: SP)" required>
+                <input type="text" name="endereco_perfil" placeholder="@seuapelido">
+            </div>
+            <div class="form-row">
+                <select name="estado_civil">
+                    <option value="">Estado civil</option>
+                    <option>Solteiro(a)</option>
+                    <option>Casado(a)</option>
+                    <option>Divorciado(a)</option>
+                    <option>Viúvo(a)</option>
+                </select>
+                <select name="interesse">
+                    <option value="">Interesse</option>
+                    <option>Amizade</option>
+                    <option>Relacionamento</option>
+                    <option>Networking</option>
+                </select>
+            </div>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="senha" placeholder="Senha" required>
+            <input type="file" name="foto_perfil" accept="image/*">
+            <button type="submit">Cadastrar</button>
+        </form>
+        <a href="/">← Voltar para o login</a>
+    </div>
+</body>
+</html>
