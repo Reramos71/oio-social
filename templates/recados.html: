@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Ôio Social - Recados</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:#f0f2f5;font-family:'Segoe UI',Arial}
+        .container{max-width:700px;margin:auto;padding:20px}
+        .card{background:white;padding:20px;border-radius:10px;margin-bottom:15px}
+        .header{background:linear-gradient(135deg,#009c3b,#ffdf00);padding:15px;border-radius:10px;margin-bottom:20px}
+        .header a{color:#333;text-decoration:none;margin:0 10px}
+        .flag{font-size:25px;margin-right:10px}
+        input,textarea{width:100%;padding:12px;margin:10px 0;border:1px solid #ddd;border-radius:8px}
+        button{background:#009c3b;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer}
+        .recado{border-bottom:1px solid #eee;padding:10px 0}
+        .cutucada{background:#ffeb3b;padding:10px;border-radius:8px;margin:10px 0}
+        .btn-cutucada{background:#ff9800;margin-top:10px}
+        .msg{background:#ffeb3b;padding:10px;border-radius:8px;margin-bottom:15px}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <span class="flag">🇧🇷</span>
+                    <h2>Ôio Social</h2>
+                </div>
+                <div>
+                    <a href="/feed">🏠 Feed</a>
+                    <a href="/perfil">👤 Perfil</a>
+                    <a href="/recados">📬 Recados</a>
+                    <a href="/logout">🚪 Sair</a>
+                </div>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for msg in messages %}
+                    <div class="msg">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <h3>Enviar Recado</h3>
+            <form method="POST" action="/enviar_recado">
+                <input type="text" name="para_apelido" placeholder="Apelido do amigo" required>
+                <textarea name="mensagem" rows="3" placeholder="Escreva seu recado..."></textarea>
+                <button type="submit">📨 Enviar Recado</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <form method="GET" action="/cutucar_todos">
+                <button type="submit" class="btn-cutucada" style="width:100%">👊 Cutucar TODOS os amigos!</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>📬 Meus Recados</h3>
+            {% for recado in recados %}
+            <div class="{% if recado[8] == 1 %}cutucada{% else %}recado{% endif %}">
+                <b>{{ recado[5] }}</b>
+                <p>{{ recado[6] }}</p>
+                <small>{{ recado[9] }}</small>
+                {% if recado[8] == 1 %}
+                    <span style="color:#ff9800"> 👊 CUTUCOU!</span>
+                {% endif %}
+            </div>
+            {% else %}
+            <p>Nenhum recado ainda. Envie um recado para um amigo!</p>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
