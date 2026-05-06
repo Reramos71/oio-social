@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Ôio Social - Perfil</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:#f0f2f5;font-family:'Segoe UI',Arial}
+        .container{max-width:700px;margin:auto;padding:20px}
+        .card{background:white;padding:20px;border-radius:10px;margin-bottom:15px;text-align:center}
+        .foto{width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid #009c3b;margin:0 auto;display:block}
+        .nav{display:flex;justify-content:center;gap:20px;margin:15px 0}
+        .nav a{color:#009c3b;text-decoration:none}
+        button{background:#009c3b;color:white;border:none;padding:8px 15px;border-radius:8px;cursor:pointer}
+        .header{background:linear-gradient(135deg,#009c3b,#ffdf00);padding:15px;border-radius:10px;margin-bottom:20px}
+        .header a{color:#333;text-decoration:none;margin:0 10px}
+        .post-item{border-bottom:1px solid #eee;padding:10px 0;text-align:left}
+        .recado-item{background:#f9f9f9;padding:10px;border-radius:8px;margin:10px 0;text-align:left}
+        .cutucada{background:#ffeb3b}
+        select{padding:5px;border-radius:8px}
+        .flag{font-size:30px;margin-bottom:10px}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <span class="flag">🇧🇷</span>
+                    <h2>Ôio Social</h2>
+                </div>
+                <div>
+                    <a href="/feed">🏠 Feed</a>
+                    <a href="/perfil">👤 Perfil</a>
+                    <a href="/recados">📬 Recados</a>
+                    <a href="/logout">🚪 Sair</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="/static/uploads/{{ usuario[11] or 'default.png' }}" class="foto" onerror="this.src='https://via.placeholder.com/120'">
+            <h2>{{ usuario[1] }}</h2>
+            <p>@{{ usuario[2] }} • {{ usuario[4] }} - {{ usuario[5] }}</p>
+            
+            <form method="POST" action="/editar_humor" style="margin:15px 0">
+                <select name="humor" onchange="this.form.submit()">
+                    <option value="Feliz" {% if usuario[12] == 'Feliz' %}selected{% endif %}>😄 Feliz</option>
+                    <option value="Triste" {% if usuario[12] == 'Triste' %}selected{% endif %}>😢 Triste</option>
+                    <option value="Apaixonado" {% if usuario[12] == 'Apaixonado' %}selected{% endif %}>😍 Apaixonado</option>
+                    <option value="Animado" {% if usuario[12] == 'Animado' %}selected{% endif %}>🎉 Animado</option>
+                    <option value="Cansado" {% if usuario[12] == 'Cansado' %}selected{% endif %}>😴 Cansado</option>
+                </select>
+            </form>
+            
+            <div class="nav">
+                <a href="#">✏️ Editar Perfil</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Meus Posts</h3>
+            {% for post in posts %}
+            <div class="post-item">
+                <p><b>{{ post[2] }}</b></p>
+                <p>{{ post[3] }}</p>
+                <small>❤️ {{ post[4] }} curtidas</small>
+            </div>
+            {% else %}
+            <p>Nenhum post ainda. <a href="/feed">Criar post</a></p>
+            {% endfor %}
+        </div>
+
+        <div class="card">
+            <h3>Últimos Recados Recebidos</h3>
+            {% for recado in recados %}
+            <div class="recado-item {% if recado[8] == 1 %}cutucada{% endif %}">
+                <b>{{ recado[5] }}</b>
+                <p>{{ recado[6] }}</p>
+                <small>{{ recado[9] }}</small>
+            </div>
+            {% else %}
+            <p>Nenhum recado ainda. <a href="/recados">Enviar recado</a></p>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
