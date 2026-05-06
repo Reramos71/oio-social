@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Ôio Social - Feed</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{background:#f0f2f5;font-family:'Segoe UI',Arial}
+        .container{max-width:700px;margin:auto;padding:20px}
+        .header{background:linear-gradient(135deg,#009c3b,#ffdf00);padding:15px;border-radius:10px;margin-bottom:20px;color:#333}
+        .header h2{color:#1a1a1a}
+        .card{background:white;padding:15px;border-radius:10px;margin-bottom:15px}
+        textarea{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;margin:10px 0}
+        button{background:#009c3b;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer}
+        .post{border-bottom:1px solid #eee;padding:10px 0}
+        .post img{max-width:100%;border-radius:8px;margin:10px 0}
+        .acoes a{margin-right:15px;color:#009c3b;text-decoration:none}
+        .nav a{color:white;text-decoration:none;margin:0 10px}
+        .foto-pequena{width:40px;height:40px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:10px}
+        .post-header{display:flex;align-items:center;margin-bottom:10px}
+        a{color:#009c3b;text-decoration:none}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <h2>🇧🇷 Ôio Social</h2>
+                <div class="nav">
+                    <a href="/feed">🏠 Feed</a>
+                    <a href="/perfil">👤 Perfil</a>
+                    <a href="/recados">📬 Recados</a>
+                    <a href="/logout">🚪 Sair</a>
+                </div>
+            </div>
+            <p>Olá, {{ user_nome }}!</p>
+        </div>
+
+        <div class="card">
+            <h3>O que você quer mostrar hoje?</h3>
+            <form method="POST" action="/postar" enctype="multipart/form-data">
+                <textarea name="texto" rows="3" placeholder="Escreva algo..."></textarea>
+                <input type="file" name="imagem" accept="image/*">
+                <button type="submit">Publicar 🇧🇷</button>
+            </form>
+        </div>
+
+        <h3>Notícias</h3>
+        {% for post in posts %}
+        <div class="card post">
+            <div class="post-header">
+                <img src="/static/uploads/{{ post[6] or 'default.png' }}" class="foto-pequena" onerror="this.src='https://via.placeholder.com/40'">
+                <b>{{ post[1] }}</b>
+            </div>
+            <p>{{ post[2] }}</p>
+            {% if post[3] %}
+            <img src="/static/uploads/{{ post[3] }}">
+            {% endif %}
+            <div class="acoes">
+                <a href="/curtir/{{ post[0] }}">❤️ Curtir ({{ post[4] }})</a>
+                <a href="#">💬 Comentar ({{ post[7] }})</a>
+                <a href="#">🔄 Compartilhar</a>
+                <a href="#">😢 Saudades</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
