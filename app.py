@@ -2,19 +2,24 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
+
 app = Flask(__name__)
+
 # Configurações para Produção
 app.secret_key = os.environ.get('SECRET_KEY', 'oio_chave_secreta_123')
 # No Render, usamos um fallback para SQLite, mas o ideal é usar DATABASE_URL
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///oio.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
+
 # --- MODELOS ---
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     senha = db.Column(db.String(120), nullable=False)
+
 class Perfil(db.Model):
     id = db.Column(db.Integer, db.ForeignKey('usuario.id'), primary_key=True)
     foto = db.Column(db.String(200), default='default.jpg')
@@ -25,21 +30,25 @@ class Perfil(db.Model):
     interesses = db.Column(db.String(200), default='')
     autobiografia = db.Column(db.String(500), default='')
     status = db.Column(db.String(100), default='')
+
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     conteudo = db.Column(db.String(300), nullable=False)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+
 # Criar banco de dados e pastas necessárias
 with app.app_context():
     db.create_all()
     os.makedirs('static/foto_perfil', exist_ok=True)
+
 # --- ROTAS ---
 @app.route('/')
 def home():
     if 'usuario_id' not in session:
         return redirect(url_for('login'))
     return redirect(url_for('feed'))
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -51,6 +60,7 @@ def login():
             session['usuario_nome'] = usuario.nome
             return redirect(url_for('feed'))
     return render_template('login.html')
+
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     if request.method == 'POST':
@@ -64,6 +74,7 @@ def cadastro():
         session['usuario_nome'] = novo.nome
         return redirect(url_for('editar_perfil'))
     return render_template('cadastro.html')
+
 @app.route('/perfil/<int:usuario_id>')
 def ver_perfil(usuario_id):
     usuario = Usuario.query.get_or_404(usuario_id)
@@ -73,6 +84,7 @@ def ver_perfil(usuario_id):
         db.session.add(perfil)
         db.session.commit()
     return render_template('perfil.html', usuario=usuario, perfil=perfil)
+
 @app.route('/editar_perfil', methods=['GET', 'POST'])
 def editar_perfil():
     if 'usuario_id' not in session:
@@ -92,13 +104,15 @@ def editar_perfil():
         perfil.status = request.form.get('status', '')
         db.session.commit()
         return redirect(url_for('ver_perfil', usuario_id=session['usuario_id']))
-        return render_template('editar_perfil.html', perfil=perfil)
+    return render_template('editar_perfil.html', perfil=perfil)
+
 @app.route('/feed')
 def feed():
     if 'usuario_id' not in session:
         return redirect(url_for('login'))
     posts = Post.query.order_by(Post.data_criacao.desc()).all()
     return render_template('feed.html', posts=posts)
+
 @app.route('/postar', methods=['POST'])
 def postar():
     if 'usuario_id' not in session:
@@ -108,11 +122,12 @@ def postar():
     db.session.add(novo_post)
     db.session.commit()
     return redirect(url_for('feed'))
+
 @app.route('/sair')
 def sair():
     session.clear()
     return redirect(url_for('login'))
+
 if __name__ == '__main__':
-    # AJUSTE PARA O RENDER: Pega a porta da variável de ambiente
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
