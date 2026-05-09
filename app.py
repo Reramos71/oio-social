@@ -61,7 +61,7 @@ def login():
             session['usuario_id'] = usuario.id
             session['usuario_nome'] = usuario.nome
             return redirect(url_for('feed'))
-    return render_template('login.html')
+   return "<h1>LOGIN FUNCIONANDO</h1>"
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
