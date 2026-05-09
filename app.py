@@ -36,11 +36,14 @@ class Post(db.Model):
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Criar banco
-with app.app_context():
-    db.create_all()
-    os.makedirs('static/foto_perfil', exist_ok=True)
 
+    # Criar admin automático
+    if not Usuario.query.filter_by(email="admin@oio.com").first():
+        admin = Usuario(nome="Admin", email="admin@oio.com", senha="admin123")
+        db.session.add(admin)
+        db.session.commit()
+
+    os.makedirs('static/foto_perfil', exist_ok=True)
 # --- ROTAS ---
 @app.route('/')
 def home():
