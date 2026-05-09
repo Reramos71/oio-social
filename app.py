@@ -1,12 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for, sessionfrom flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template, request, redirect, url_for, session
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 
 app = Flask(__name__)
 
-# Configurações para Produção
+# Configurações
 app.secret_key = os.environ.get('SECRET_KEY', 'oio_chave_secreta_123')
-# No Render, usamos um fallback para SQLite, mas o ideal é usar DATABASE_URL
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///oio.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -36,7 +36,7 @@ class Post(db.Model):
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Criar banco de dados e pastas necessárias
+# Criar banco
 with app.app_context():
     db.create_all()
     os.makedirs('static/foto_perfil', exist_ok=True)
@@ -66,33 +66,46 @@ def cadastro():
         nome = request.form['nome']
         email = request.form['email']
         senha = request.form['senha']
+
+        # Evita duplicar email
+        if Usuario.query.filter_by(email=email).first():
+            return "Email já cadastrado"
+
         novo = Usuario(nome=nome, email=email, senha=senha)
         db.session.add(novo)
         db.session.commit()
+
         session['usuario_id'] = novo.id
         session['usuario_nome'] = novo.nome
+
         return redirect(url_for('editar_perfil'))
+
     return render_template('cadastro.html')
 
 @app.route('/perfil/<int:usuario_id>')
 def ver_perfil(usuario_id):
     usuario = Usuario.query.get_or_404(usuario_id)
     perfil = Perfil.query.get(usuario_id)
+
     if not perfil:
         perfil = Perfil(id=usuario_id)
         db.session.add(perfil)
         db.session.commit()
+
     return render_template('perfil.html', usuario=usuario, perfil=perfil)
 
 @app.route('/editar_perfil', methods=['GET', 'POST'])
 def editar_perfil():
     if 'usuario_id' not in session:
         return redirect(url_for('login'))
+
     perfil = Perfil.query.get(session['usuario_id'])
+
     if not perfil:
         perfil = Perfil(id=session['usuario_id'])
         db.session.add(perfil)
         db.session.commit()
+
     if request.method == 'POST':
         perfil.data_nascimento = request.form.get('data_nascimento', '')
         perfil.local_nascimento = request.form.get('local_nascimento', '')
@@ -101,14 +114,17 @@ def editar_perfil():
         perfil.interesses = request.form.get('interesses', '')
         perfil.autobiografia = request.form.get('autobiografia', '')
         perfil.status = request.form.get('status', '')
+
         db.session.commit()
         return redirect(url_for('ver_perfil', usuario_id=session['usuario_id']))
+
     return render_template('editar_perfil.html', perfil=perfil)
 
 @app.route('/feed')
 def feed():
     if 'usuario_id' not in session:
         return redirect(url_for('login'))
+
     posts = Post.query.order_by(Post.data_criacao.desc()).all()
     return render_template('feed.html', posts=posts)
 
@@ -116,10 +132,16 @@ def feed():
 def postar():
     if 'usuario_id' not in session:
         return redirect(url_for('login'))
+
     conteudo = request.form['conteudo']
+
+    if not conteudo:
+        return redirect(url_for('feed'))
+
     novo_post = Post(conteudo=conteudo, usuario_id=session['usuario_id'])
     db.session.add(novo_post)
     db.session.commit()
+
     return redirect(url_for('feed'))
 
 @app.route('/sair')
