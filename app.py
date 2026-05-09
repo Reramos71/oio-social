@@ -5,9 +5,9 @@ import os
 
 app = Flask(__name__)
 
-# Configurações
+# Configurações (FORÇANDO SQLITE PRA NÃO DAR ERRO NO RENDER)
 app.secret_key = os.environ.get('SECRET_KEY', 'oio_chave_secreta_123')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///oio.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///oio.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -67,7 +67,6 @@ def cadastro():
         email = request.form['email']
         senha = request.form['senha']
 
-        # Evita duplicar email
         if Usuario.query.filter_by(email=email).first():
             return "Email já cadastrado"
 
