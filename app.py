@@ -1,14 +1,20 @@
-cat > app.py << 'FIM'
-from flask import Flask, render_template, request, redirect, url_for, session
+
+    from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 
 app = Flask(__name__)
-app.secret_key = 'oio_chave_secreta'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///oio.db'
+
+# Configurações para Produção
+app.secret_key = os.environ.get('SECRET_KEY', 'oio_chave_secreta_123')
+# No Render, usamos um fallback para SQLite, mas o ideal é usar DATABASE_URL
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///oio.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
+# --- MODELOS ---
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(80), nullable=False)
@@ -32,10 +38,12 @@ class Post(db.Model):
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
 
+# Criar banco de dados e pastas necessárias
 with app.app_context():
     db.create_all()
     os.makedirs('static/foto_perfil', exist_ok=True)
 
+# --- ROTAS ---
 @app.route('/')
 def home():
     if 'usuario_id' not in session:
@@ -89,13 +97,13 @@ def editar_perfil():
         db.session.commit()
     
     if request.method == 'POST':
-        perfil.data_nascimento = request.form['data_nascimento']
-        perfil.local_nascimento = request.form['local_nascimento']
-        perfil.estado = request.form['estado']
-        perfil.estado_civil = request.form['estado_civil']
-        perfil.interesses = request.form['interesses']
-        perfil.autobiografia = request.form['autobiografia']
-        perfil.status = request.form['status']
+        perfil.data_nascimento = request.form.get('data_nascimento', '')
+        perfil.local_nascimento = request.form.get('local_nascimento', '')
+        perfil.estado = request.form.get('estado', '')
+        perfil.estado_civil = request.form.get('estado_civil', '')
+        perfil.interesses = request.form.get('interesses', '')
+        perfil.autobiografia = request.form.get('autobiografia', '')
+        perfil.status = request.form.get('status', '')
         db.session.commit()
         return redirect(url_for('ver_perfil', usuario_id=session['usuario_id']))
     
@@ -124,5 +132,6 @@ def sair():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
-FIM
+    # AJUSTE PARA O RENDER: Pega a porta da variável de ambiente
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
