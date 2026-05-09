@@ -5,9 +5,9 @@ import os
 
 app = Flask(__name__)
 
-# Configurações (FORÇANDO SQLITE PRA NÃO DAR ERRO NO RENDER)
+# Configurações
 app.secret_key = os.environ.get('SECRET_KEY', 'oio_chave_secreta_123')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///oio.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///oio.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -36,6 +36,9 @@ class Post(db.Model):
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
 
+# --- CRIAR BANCO E ADMIN ---
+with app.app_context():
+    db.create_all()
 
     # Criar admin automático
     if not Usuario.query.filter_by(email="admin@oio.com").first():
@@ -44,6 +47,7 @@ class Post(db.Model):
         db.session.commit()
 
     os.makedirs('static/foto_perfil', exist_ok=True)
+
 # --- ROTAS ---
 @app.route('/')
 def home():
@@ -61,7 +65,7 @@ def login():
             session['usuario_id'] = usuario.id
             session['usuario_nome'] = usuario.nome
             return redirect(url_for('feed'))
-   return "<h1>LOGIN FUNCIONANDO</h1>"
+    return render_template('login.html')
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
